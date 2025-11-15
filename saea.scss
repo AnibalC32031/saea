@@ -1,0 +1,213 @@
+// ======================================
+// VARIABLES
+// ======================================
+$color-azul: #004a99;
+$color-azul-claro: #1474e0;
+$color-blanco: #ffffff;
+$color-gris-claro: #f9f9f9;
+$color-gris-medio: #777777;
+$color-gris-oscuro: #2e2e2e;
+$color-verde: #188038;
+$color-rojo: #d93025;
+
+$font-family-base: 'Roboto', sans-serif;
+$border-radius: 8px;
+$transition-speed: 0.3s;
+
+// ======================================
+// MIXINS
+// ======================================
+@mixin flex-center($direction: row, $justify: center, $align: center) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+}
+
+@mixin button-base($bg-color, $text-color) {
+  background-color: $bg-color;
+  color: $text-color;
+  border: none;
+  border-radius: $border-radius;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color $transition-speed ease;
+
+  &:hover,
+  &:focus {
+    background-color: darken($bg-color, 10%);
+    outline: none;
+  }
+}
+
+// ======================================
+// RESET Y ESTILOS GENERALES
+// ======================================
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-family-base;
+  background-color: $color-gris-claro;
+  color: $color-gris-oscuro;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+h1, h2, h3 {
+  color: $color-azul;
+  font-weight: 700;
+}
+
+a {
+  text-decoration: none;
+  color: $color-azul;
+}
+
+button {
+  font-family: $font-family-base;
+}
+
+// ======================================
+// LAYOUTS GENERALES
+// ======================================
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+// ======================================
+// BOTONES
+// ======================================
+.btn-primary {
+  @include button-base($color-azul, $color-blanco);
+}
+
+.btn-success {
+  @include button-base($color-verde, $color-blanco);
+}
+
+.btn-danger {
+  @include button-base($color-rojo, $color-blanco);
+}
+
+// ======================================
+// TABLAS
+// ======================================
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+
+  th, td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+  }
+
+  thead {
+    background-color: $color-azul-claro;
+    color: $color-blanco;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $color-gris-claro;
+
+    td {
+      vertical-align: middle;
+    }
+  }
+}
+
+// ======================================
+// FORMULARIOS
+// ======================================
+input, select, textarea {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid $color-gris-medio;
+  border-radius: $border-radius;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  transition: border-color $transition-speed ease;
+
+  &:focus {
+    border-color: $color-azul;
+    outline: none;
+  }
+}
+
+// ======================================
+// TARJETAS / CARDS
+// ======================================
+.card {
+  background-color: $color-blanco;
+  padding: 1.5rem;
+  border-radius: $border-radius;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+// ======================================
+// SIDEBAR
+// ======================================
+.sidebar {
+  background-color: $color-azul;
+  color: $color-blanco;
+  min-width: 220px;
+  height: 100vh;
+  padding: 2rem 1rem;
+
+  ul {
+    list-style: none;
+
+    li {
+      margin-bottom: 1rem;
+
+      a {
+        color: $color-blanco;
+        display: block;
+        padding: 0.5rem 1rem;
+        border-radius: $border-radius;
+        transition: background-color $transition-speed ease;
+
+        &:hover, &:focus {
+          background-color: $color-azul-claro;
+        }
+      }
+    }
+  }
+}
+
+// ======================================
+// RESPONSIVE
+// ======================================
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .sidebar {
+    min-width: 100%;
+    height: auto;
+  }
+
+  .table {
+    min-width: 100%;
+    display: block;
+    overflow-x: auto;
+  }
+}

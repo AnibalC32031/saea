@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAEA - Sistema de Acceso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+  
+   * { box-sizing: border-box; }
+
+    /* MAIN */
+    main {
+      margin-left: 240px;
+      padding: 80px 2rem 2rem;
+      width: calc(100% - 240px);
+    }
+
+    section { display: none; }
+    section.active { display: block; }
+
+    h2 {
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: #003366;
+      margin-bottom: 1rem;
+    }
+
+    /* ESTILOS DE TABLA */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(0, 13, 255, 0.38);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background: #012be7b7;
+      color: rgb(255, 255, 255);
+      padding: 0.75rem;
+    }
+
+    td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr:hover {
+      background: #006cf9;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .btn-primary, .btn-edit, .btn-delete { cursor: pointer; padding: 0.4rem 0.8rem; margin-right: 0.3rem; }
+    .btn-primary { background: #008015; color: white; border: none; border-radius: 4px; }
+    .btn-edit { background: #00cc1f; color: white; border: none; border-radius: 4px; }
+    .btn-delete { background: #cc0000; color: white; border: none; border-radius: 4px; }
+
+    fieldset { margin-bottom: 1rem; }
+    .error-message { color: red; font-size: 0.9rem; }
+    input, select { width: 100%; padding: 0.4rem; margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR superior -->
+  <nav class="navbar">
+    <ul>
+      <li><a href="index.html">Inicio</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="registro-asistencia.html">Asistencia</a></li>
+      <li><a href="reportes.html">Reportes</a></li>
+      <li><a href="alertas.html">Alertas</a></li>
+      <li><a href="config-usuarios.html">Usuarios</a></li>
+      <li><a href="login.html" class="logout">Salir</a></li>
+    </ul>
+  </nav>
+
+  <!-- SIDEBAR lateral con roles -->
+  <aside class="sidebar" aria-label="Menú de roles">
+    <h3>Roles</h3>
+    <ul>
+      <li><a href="#" data-section="login" class="active">Login</a></li>
+      <li><a href="#" data-section="registro">Registro Usuario (Admin)</a></li>
+      <li><a href="#" data-section="recuperar">Recuperar Contraseña</a></li>
+      <li><a href="#" data-section="verificacion">Verificación Token</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main role="main">
+    <!-- LOGIN -->
+    <section id="login" class="active" aria-labelledby="login-title">
+      <header class="login-header">
+        <img src="logo.jpg" alt="Logo Institucional SAEA" class="login-logo" />
+        <h1 id="login-title">Sistema Automatizado de Asistencia Escolar</h1>
+      </header>
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-user">Usuario (Correo o ID)</label>
+          <input type="text" id="login-user" name="user" required placeholder="ejemplo@institucion.edu"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" name="password" required minlength="8" placeholder="********"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <fieldset class="form-group">
+          <legend>Seleccione su rol</legend>
+          <label><input type="radio" name="role" value="docente" required/> Docente</label>
+          <label><input type="radio" name="role" value="administrativo"/> Administrativo</label>
+          <label><input type="radio" name="role" value="padre"/> Padre</label>
+          <span class="error-message" aria-live="polite"></span>
+        </fieldset>
+        <button type="submit" class="btn-primary">Iniciar sesión</button>
+      </form>
+      <nav class="nav-links">
+        <a data-section="recuperar">¿Olvidó su contraseña?</a>
+        <a href="mailto:soporte@saea.edu">Contacto Soporte</a>
+      </nav>
+    </section>
+
+    <!-- REGISTRO (solo admin) -->
+    <section id="registro" aria-labelledby="registro-title">
+      <h2 id="registro-title">Registro de Usuario (Solo Admin)</h2>
+      <form id="registro-form" novalidate>
+        <div class="form-group">
+          <label for="new-user">Usuario (Correo)</label>
+          <input type="email" id="new-user" name="newUser" required placeholder="nuevo@institucion.edu"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="new-password">Contraseña</label>
+          <input type="password" id="new-password" name="newPassword" required minlength="8" placeholder="********"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <fieldset class="form-group">
+          <legend>Asignar rol</legend>
+          <label><input type="radio" name="newRole" value="docente" required/> Docente</label>
+          <label><input type="radio" name="newRole" value="administrativo"/> Administrativo</label>
+          <label><input type="radio" name="newRole" value="padre"/> Padre</label>
+          <span class="error-message" aria-live="polite"></span>
+        </fieldset>
+        <button type="submit" class="btn-primary">Registrar Usuario</button>
+      </form>
+    </section>
+
+    <!-- RECUPERAR CONTRASEÑA -->
+    <section id="recuperar" aria-labelledby="recuperar-title">
+      <h2 id="recuperar-title">Recuperar Contraseña</h2>
+      <form id="recuperar-form" novalidate>
+        <div class="form-group">
+          <label for="email-recuperar">Correo Electrónico</label>
+          <input type="email" id="email-recuperar" name="email" required placeholder="usuario@institucion.edu"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn-primary">Enviar enlace de recuperación</button>
+      </form>
+    </section>
+
+    <!-- VERIFICACIÓN / TOKEN -->
+    <section id="verificacion" aria-labelledby="verificacion-title">
+      <h2 id="verificacion-title">Verificación de Token</h2>
+      <form id="token-form" novalidate>
+        <div class="form-group">
+          <label for="token">Ingrese el código recibido</label>
+          <input type="text" id="token" name="token" required placeholder="Código de verificación"/>
+          <span class="error-message" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn-primary">Verificar</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    // Navegación entre secciones usando sidebar y enlaces internos
+    document.querySelectorAll('aside.sidebar a, .nav-links a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.dataset.section;
+        if (!target) return;
+
+        document.querySelectorAll('main section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+
+        // Marcar activo en sidebar
+        document.querySelectorAll('aside.sidebar a').forEach(a => a.classList.remove('active'));
+        if (link.closest('aside')) link.classList.add('active');
+      });
+    });
+
+    // Validación simple para todos los formularios
+    function validarFormulario(form) {
+      let valid = true;
+      form.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      form.querySelectorAll('input[required]').forEach(input => {
+        if (!input.value.trim()) {
+          input.nextElementSibling.textContent = 'Campo obligatorio';
+          valid = false;
+        } else if (input.type === 'email' && !input.value.includes('@')) {
+          input.nextElementSibling.textContent = 'Correo inválido';
+          valid = false;
+        } else if (input.minLength && input.value.length < input.minLength) {
+          input.nextElementSibling.textContent = `Mínimo ${input.minLength} caracteres`;
+          valid = false;
+        }
+      });
+      return valid;
+    }
+
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        if (validarFormulario(form)) {
+          alert('Formulario válido. Aquí se enviaría al backend.');
+          form.reset();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
