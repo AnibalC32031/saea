@@ -1,66 +1,1628 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SAEA - Panel Principal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEA - Sistema Escolar Automatizado</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- LIBRERIAS EXTERNAS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="saea.css">
+    <style>
+        :root { --primary-color: #0d6efd; --secondary-color: #343a40; --bg-color: #f4f6f9; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            /* Fondo con gradiente y supuesta imagen */
+            background: linear-gradient(rgba(0, 242, 105, 0.33), rgba(0, 136, 255, 0.26)), url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            }
+
+        /* Login Styles */
+        /* Login Styles MODIFICADO */
+        #login-view { 
+            min-height: 100vh; 
+            /* Quitamos el background propio para que se vea el del body */
+            background: transparent; 
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        /* Estilos para el contenido del login (Navbar y contenedor) */
+        .login-content-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Tarjeta con efecto cristal (Glassmorphism) */
+        .glass-card { 
+            width: 100%; 
+            max-width: 450px; 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            background: rgba(179, 215, 255, 0.547); /* Blanco semi-transparente */
+            backdrop-filter: blur(10px);
+        }
+
+        /* Estilo para la sección de presentación */
+        .school-info-card {
+            max-width: 800px; /* Más ancho para leer */
+            background: rgba(255, 255, 255, 0.767);
+        }
+        /* Layout Styles */
+        #app-view { display: none; min-height: 100vh; }
+        .sidebar { width: 260px; background-color: var(--secondary-color); color: white; min-height: 100vh; position: fixed; transition: all 0.3s; z-index: 1000; }
+        .sidebar-header { padding: 20px; background: rgba(0, 5, 72, 0.2); }
+        .sidebar .nav-link { color: #cfd2d6; padding: 12px 20px; margin: 4px 10px; border-radius: 5px; transition: 0.2s; cursor: pointer; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: #fff; background-color: var(--primary-color); transform: translateX(5px); }
+        .sidebar .nav-link i { width: 25px; text-align: center; margin-right: 10px; }
+        
+        .main-content { margin-left: 260px; padding: 25px; transition: all 0.3s; }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar { margin-left: -260px; }
+            .sidebar.active { margin-left: 0; }
+            .main-content { margin-left: 0; }
+            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+            .sidebar-overlay.active { display: block; }
+        }
+
+        /* Cards & Utilities */
+        .stat-card { border: none; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .icon-box { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+        .section-view { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .section-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .grade-input { width: 60px; text-align: center; border: 1px solid #ced4da; border-radius: 4px; }
+        .grade-input:focus { border-color: var(--primary-color); outline: none; }
+        .failing-grade { color: #dc3545; font-weight: bold; }
+        .passing-grade { color: #198754; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <ul>
-      <li><a href="index.html" class="active">Inicio</a></li>
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="registro-asistencia.html">Asistencia</a></li>
-      <li><a href="reportes.html">Reportes</a></li>
-      <li><a href="alertas.html">Alertas</a></li>
-      <li><a href="config-usuarios.html">Usuarios</a></li>
-      <li><a href="login.html" class="logout">Salir</a></li>
-    </ul>
-  </nav>
+    <!-- LOGIN VIEW -->
+    <div id="login-view">
+        
+        <!-- Nueva Barra de Navegación en Login -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary bg-opacity-75 shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#"><i class="fas fa-school me-2"></i>SEA</a>
+                
+                <!-- Botón Hamburguesa -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#loginNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-  <!-- HEADER -->
-  <header class="header">
-    <h1>Panel Principal</h1>
-    <p>Bienvenido al Sistema de Asistencia Escolar Automatizado</p>
-  </header>
+                <div class="collapse navbar-collapse" id="loginNavbar">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="app.toggleLoginSection('home')">Ingresar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="app.toggleLoginSection('info')">Nuestra Escuela</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-  <!-- CONTENIDO -->
-  <main class="container">
-    <section>
-      <h2>Acceso a Funciones del Sistema</h2>
-      <p>
-        Desde este panel podrá gestionar la asistencia, consultar reportes,
-        administrar usuarios y visualizar alertas generadas automáticamente.
-      </p>
-    </section>
+        <div class="login-content-wrapper">
+            
+            <!-- SECCIÓN 1: FORMULARIO DE LOGIN (Visible por defecto) -->
+            <div id="login-form-container" class="card glass-card p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+                    <h2 class="fw-bold text-dark">Bienvenido</h2>
+                    <p class="text-muted">Sistema Escolar Automatizado</p>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Gendarmería Nacional</span>
+                </div>
+                
+                <div id="loginError" class="alert alert-danger d-none"><i class="fas fa-exclamation-circle"></i> Credenciales incorrectas</div>
+                
+                <form id="loginForm">
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com" value="director@sea.edu" required>
+                        <label for="loginEmail">Correo Institucional</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="loginPass" placeholder="Password" value="123456" required>
+                        <label for="loginPass">Contraseña</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">INGRESAR AL SISTEMA</button>
+                </form>
+                <div class="text-center mt-4 text-muted small">
+                    <p>2025</p>
+                </div>
+            </div>
 
-    <section class="cards-section">
-      <div class="card">
-        <h3>Estudiantes Registrados</h3>
-        <p class="card-number">524</p>
-      </div>
+            <!-- SECCIÓN 2: PRESENTACIÓN DE LA ESCUELA (Oculta por defecto) -->
+            <div id="school-info-container" class="card glass-card school-info-card p-5" style="display: none;">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-primary">Escuela Normal Gendarmería Nacional</h2>
+                    <hr class="mx-auto" style="width: 100px; height: 3px; background-color: #0d6efd; opacity: 1;">
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold"><i class="fas fa-history text-warning me-2"></i>Nuestra Historia</h5>
+                        <p class="text-muted small">
+                            Fundada en 1985, nuestra institución ha sido un pilar fundamental en la educación de la región, 
+                            formando líderes con valores éticos y excelencia académica. Contamos con más de 40 años de trayectoria.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold"><i class="fas fa-bullseye text-danger me-2"></i>Misión</h5>
+                        <p class="text-muted small">
+                            Brindar una educación integral de calidad, promoviendo el pensamiento crítico, 
+                            la creatividad y el compromiso social en nuestros estudiantes.
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <div class="alert alert-light border border-primary">
+                            <h6 class="fw-bold text-primary mb-2">Ubicación y Contacto</h6>
+                            <p class="mb-1 small"><i class="fas fa-map-marker-alt me-2"></i> Av. Principal 1234, Buenos Aires, Argentina</p>
+                            <p class="mb-0 small"><i class="fas fa-phone me-2"></i> (011) 4567-8900 | contacto@sea.edu.ar</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary px-4" onclick="app.toggleLoginSection('home')">
+                        <i class="fas fa-arrow-left me-2"></i> Volver al Login
+                    </button>
+                </div>
+            </div>
 
-      <div class="card">
-        <h3>Asistencias Hoy</h3>
-        <p class="card-number">486</p>
-      </div>
+        </div>
+    </div>
 
-      <div class="card">
-        <h3>Alertas Activas</h3>
-        <p class="card-number">12</p>
-      </div>
-    </section>
-  </main>
+    <!-- APP VIEW -->
+    <div id="app-view">
+        <div class="sidebar-overlay" onclick="app.toggleSidebar()"></div>
+        
+        <!-- Sidebar -->
+        <nav class="sidebar d-flex flex-column">
+            <div class="sidebar-header d-flex align-items-center">
+                <i class="fas fa-graduation-cap fa-2x me-2 text-warning"></i>
+                <div>
+                    <h5 class="mb-0 fw-bold">SEA</h5>
+                    <small class="text-white-50">Panel Administrativo</small>
+                </div>
+            </div>
+            
+            <ul class="nav nav-pills flex-column mb-auto mt-3 p-2">
+                <li class="nav-item"><a class="nav-link active" onclick="app.navigate('dashboard', this)"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <!-- Seccion Administracion integrada -->
+                <li><a class="nav-link" onclick="app.navigate('administracion', this)"><i class="fas fa-cogs"></i> Administración</a></li>
+                <li><a class="nav-link" onclick="app.navigate('asistencia', this)"><i class="fas fa-user-clock"></i> Asistencia</a></li>
+                <li><a class="nav-link" onclick="app.navigate('calificaciones', this)"><i class="fas fa-star"></i> Gestión Académica</a></li>
+                <li><a class="nav-link" onclick="app.navigate('reportes', this)"><i class="fas fa-file-alt"></i> Reportes y Boletines</a></li>
+                <li><a class="nav-link" onclick="app.navigate('alertas', this)"><i class="fas fa-bell"></i> Alertas <span class="badge bg-danger ms-auto" id="alertCount">0</span></a></li>
+                <li><a class="nav-link" onclick="app.navigate('usuarios', this)"><i class="fas fa-users-cog"></i> Usuarios y Roles</a></li>
+            </ul>
+            
+            <div class="p-3 mt-auto bg-dark border-top border-secondary">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle d-flex justify-content-center align-items-center text-white fw-bold me-2" style="width:35px; height:35px;">U</div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <strong class="d-block text-truncate" id="userNameDisplay">Usuario</strong>
+                        <small class="text-white-50" id="userRoleDisplay">Rol</small>
+                    </div>
+                    <a href="#" onclick="app.logout()" class="text-white-50 hover-white ms-2"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+        </nav>
 
-  <footer>
-    <p>&copy; 2025 SAEA - Sistema de Asistencia Escolar Automatizado | soporte@saea.edu</p>
-  </footer>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <nav class="navbar navbar-light bg-white rounded shadow-sm mb-4 px-3 py-2">
+                <div class="d-flex align-items-center w-100">
+                    <button class="btn btn-link text-secondary d-md-none me-2" onclick="app.toggleSidebar()"><i class="fas fa-bars fa-lg"></i></button>
+                    <span class="navbar-text fw-bold text-secondary fs-5" id="page-title">Dashboard General</span>
+                    
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                            <i class="fas fa-database me-1"></i> En Línea
+                        </span>
+                        <div class="text-end d-none d-sm-block">
+                            <small class="text-muted d-block" id="currentDate">Fecha</small>
+                        </div>
+                    </div>
+                </div>
+            </nav>
 
+            <!-- 1. DASHBOARD -->
+            <div id="dashboard" class="section-view active">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-white p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small fw-bold text-uppercase">Presentismo Hoy</p>
+                                    <h2 class="fw-bold mb-0">92%</h2>
+                                </div>
+                                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="fas fa-users"></i></div>
+                            </div>
+                            <small class="text-success mt-2 d-block"><i class="fas fa-arrow-up"></i> +2% vs ayer</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-white p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small fw-bold text-uppercase">Alertas Activas</p>
+                                    <h2 class="fw-bold mb-0 text-danger" id="dashAlerts">0</h2>
+                                </div>
+                                <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="fas fa-exclamation-triangle"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-white p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small fw-bold text-uppercase">Notas Cargadas</p>
+                                    <h2 class="fw-bold mb-0" id="statsGradesPercent">65%</h2>
+                                </div>
+                                <div class="icon-box bg-warning bg-opacity-10 text-warning"><i class="fas fa-edit"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-white p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <p class="text-muted mb-1 small fw-bold text-uppercase">Matrícula Total</p>
+                                    <h2 class="fw-bold mb-0" id="totalStudentsCount">0</h2>
+                                </div>
+                                <div class="icon-box bg-info bg-opacity-10 text-info"><i class="fas fa-school"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold py-3">Rendimiento Académico por Curso</div>
+                            <div class="card-body">
+                                <canvas id="academicChart" height="120"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-header bg-white fw-bold py-3">Asistencia Diaria</div>
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <canvas id="attendanceChart" style="max-height: 250px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ADMINISTRACIÓN (INTEGRADO) -->
+            <div id="administracion" class="section-view">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="alumnos-tab" data-bs-toggle="tab" data-bs-target="#alumnos" type="button">Gestión de Alumnos</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="materias-tab" data-bs-toggle="tab" data-bs-target="#materias" type="button">Gestión de Materias</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="adminTabsContent">
+                            <!-- TAB ALUMNOS -->
+                            <div class="tab-pane fade show active" id="alumnos" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title text-primary fw-bold">Base de Datos de Estudiantes</h5>
+                                   <!-- Reemplaza el botón "Nuevo Alumno" existente con este: -->
+                                    <button class="btn btn-primary" onclick="app.openNewStudentModal()">
+                                        <i class="fas fa-user-plus"></i> Nuevo Alumno
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Legajo</th>
+                                                <th>Apellido y Nombre</th>
+                                                <th>Curso</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="studentsTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- TAB MATERIAS -->
+                            <div class="tab-pane fade" id="materias" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title text-primary fw-bold">Plan de Estudios (Materias)</h5>
+                                    <!-- Reemplaza el botón "Nueva Materia" viejo por este: -->
+                                        <button class="btn btn-success" onclick="app.openNewSubjectModal()">
+                                            <i class="fas fa-book-medical"></i> Nueva Materia
+                                        </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID Ref</th>
+                                                <th>Nombre de la Asignatura</th>
+                                                <th>Año</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="subjectsTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ASISTENCIA -->
+            <div id="asistencia" class="section-view">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4 text-primary fw-bold">Registro Diario</h5>
+                        <form id="attendanceForm" onsubmit="app.loadAttendanceSheet(event)">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Curso</label>
+                                    <select class="form-select dynamic-course-select" id="attCourse" required>
+                                        <option value="" selected disabled>Cargando...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Fecha</label>
+                                    <input type="date" class="form-control" id="attDate" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">Preceptor</label>
+                                    <input type="text" class="form-control bg-light" value="Usuario Actual" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Cargar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="attendanceSheet" style="display:none;">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <h6 class="mb-0 fw-bold" id="sheetHeader">Planilla de Alumnos</h6>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="app.markAll('P')">Todos Presentes</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Legajo</th>
+                                        <th>Estudiante</th>
+                                        <th class="text-center">Estado (P/A/T)</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white text-end py-3">
+                            <button class="btn btn-success px-4" onclick="app.saveAttendance()"><i class="fas fa-save me-2"></i> Guardar Registro</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. GESTIÓN ACADÉMICA (NOTAS) -->
+            <div id="calificaciones" class="section-view">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4 text-primary fw-bold">Carga de Calificaciones</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small text-muted">Curso</label>
+                                        <select class="form-select dynamic-course-select" id="gradeCourse" onchange="app.resetGradesTable()">
+                                            <!-- JS -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small text-muted">Materia</label>
+                                        <select class="form-select dynamic-subject-select" id="gradeSubject" onchange="app.resetGradesTable()">
+                                            <!-- JS -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button class="btn btn-secondary w-100" onclick="app.loadGrades()"><i class="fas fa-sync-alt"></i> Visualizar Planilla</button>
+                                    </div>
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button class="btn btn-outline-danger w-100" onclick="alert('Cierre de trimestre simulado')"><i class="fas fa-lock"></i> Cerrar Trimestre</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gradesContainer" style="display:none;">
+                    <div class="card shadow-sm border-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover mb-0 text-center align-middle">
+                                <thead class="table-dark text-white">
+                                    <tr>
+                                        <th class="text-start ps-3">Estudiante</th>
+                                        <th style="width:100px">1° Trim</th>
+                                        <th style="width:100px">2° Trim</th>
+                                        <th style="width:100px">3° Trim</th>
+                                        <th style="width:100px" class="bg-secondary">Promedio</th>
+                                        <th style="width:120px">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gradesTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between py-3">
+                            <small class="text-muted align-self-center"><i class="fas fa-info-circle"></i> Cambios guardados en tiempo real.</small>
+                            <button class="btn btn-primary" onclick="app.notifyChanges()"><i class="fas fa-paper-plane"></i> Notificar a Dirección</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. REPORTES -->
+            <div id="reportes" class="section-view">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body">
+                                <h5 class="fw-bold mb-4">Centro de Exportación</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Reporte</label>
+                                    <select class="form-select" id="reportType">
+                                        <option value="boletin">Boletín de Calificaciones</option>
+                                        <option value="asistencia">Informe de Asistencia</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Curso</label>
+                                    <select class="form-select dynamic-course-select" id="reportCourse"></select>
+                                </div>
+                                <hr>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-danger" onclick="app.generatePDF()"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
+                                    <button class="btn btn-outline-success" onclick="app.generateExcel()"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body bg-light d-flex flex-column align-items-center justify-content-center text-muted p-5">
+                                <i class="fas fa-print fa-4x mb-3"></i>
+                                <p>Seleccione parámetros para generar la vista previa.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. ALERTAS -->
+            <div id="alertas" class="section-view">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold text-danger"><i class="fas fa-bell"></i> Panel de Alertas Pedagógicas</h4>
+                    <button class="btn btn-primary" onclick="app.scanAlerts()"><i class="fas fa-sync"></i> Escanear Sistema</button>
+                </div>
+                <div class="card shadow-sm border-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light"><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Detalle</th><th>Acción</th></tr></thead>
+                        <tbody id="alertsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 7. USUARIOS -->
+            <div id="usuarios" class="section-view">
+                 <button class="btn btn-success" onclick="app.openNewUserModal()" data-bs-toggle="modal" data-bs-target="#userModal">
+                        <i class="fas fa-user-plus"></i> Nuevo Usuario
+                    </button>
+                <div class="card shadow-sm border-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light"><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Acciones</th></tr></thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODALES ================= -->
+
+    <!-- Modal Usuario -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="userModalTitle">Crear Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <!-- ESTA ES LA CLAVE: Input oculto para saber si editamos o creamos -->
+                    <input type="hidden" id="userIndex" value="-1"> 
+                    
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        <input type="text" class="form-control" id="newUserName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="newUserEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Rol</label>
+                        <select class="form-select" id="newUserRole">
+                            <option>Preceptor</option>
+                            <option>Docente</option>
+                            <option>Auxiliar</option>
+                            <option>Directivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <!-- Llama a la función saveUser() -->
+                <button class="btn btn-primary" onclick="app.saveUser()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal Nuevo Alumno -->
+<!-- Modal Alumno (Agregar / Editar) -->
+<div class="modal fade" id="studentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="studentModalTitle">Registrar Alumno</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <!-- Campo oculto para guardar el índice al editar -->
+                    <input type="hidden" id="stIndex" value="-1">
+                    
+                    <div class="mb-3">
+                        <label>Legajo</label>
+                        <input type="text" class="form-control" id="stLegajo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Apellidos y Nombres</label>
+                        <input type="text" class="form-control" id="stName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Curso Asignado</label>
+                        <select class="form-select" id="stCourse">
+                            <option value="1A">1ro Año "A"</option>
+                            <option value="2B">2do Año "B"</option>
+                            <option value="3C">3ro Año "C"</option>
+                            <option value="4A">4to Año "A"</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="app.saveStudent()">Guardar Datos</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal Nueva Materia -->
+    <!-- Modal Materia (Agregar / Editar) -->
+<div class="modal fade" id="subjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="subjectModalTitle">Registrar Materia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="subjectForm">
+                    <!-- Campo oculto para el índice -->
+                    <input type="hidden" id="subIndex" value="-1">
+
+                    <div class="mb-3">
+                        <label>ID Referencia (ej: mat_1)</label>
+                        <input type="text" class="form-control" id="subId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Nombre Asignatura</label>
+                        <input type="text" class="form-control" id="subName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Año:</label>
+                        <select class="form-select" id="subYear">
+                            <option value="Todos">Todos</option>
+                            <option value="1">1ro</option>
+                            <option value="2">2do</option>
+                            <option value="3">3ro</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="app.saveSubject()">Guardar Materia</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ================= MODAL DE COMUNICACIÓN (NUEVO) ================= -->
+<div class="modal fade" id="commModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-paper-plane"></i> Enviar Notificación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="commForm">
+                    <input type="hidden" id="commAlertIndex">
+                    
+                    <div class="mb-3">
+                        <p class="fw-bold">Destinatario: <span id="commStudentName" class="text-primary"></span></p>
+                        <p class="small text-muted">Motivo: <span id="commReason"></span></p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Canal de Comunicación</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check border p-3 rounded w-50">
+                                <input class="form-check-input" type="radio" name="commType" id="typeEmail" value="email" checked>
+                                <label class="form-check-label w-100" for="typeEmail">
+                                    <i class="fas fa-envelope text-danger"></i> Correo Electrónico
+                                </label>
+                            </div>
+                            <div class="form-check border p-3 rounded w-50">
+                                <input class="form-check-input" type="radio" name="commType" id="typeSMS" value="sms">
+                                <label class="form-check-label w-100" for="typeSMS">
+                                    <i class="fas fa-comment-alt text-primary"></i> SMS
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mensaje</label>
+                        <textarea class="form-control" id="commMessage" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning fw-bold" onclick="app.sendAlert()">
+                    Enviar Aviso
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const app = {
+            // BASE DE DATOS MOCK
+            db: {
+                subjects: [
+                    { id: 'matematica', name: 'Matemáticas', year: 'Todos' },
+                    { id: 'lengua', name: 'Lengua y Literatura', year: 'Todos' },
+                    { id: 'historia', name: 'Historia', year: 'Todos' },
+                    { id: 'fisica', name: 'Física', year: '3' }
+                ],
+                students: [
+                    { id: '202501', name: 'Alvarez, Sofia', course: '1A', attendance: [], grades: { matematica: [7, 8, null], lengua: [9, 9, null] } },
+                    { id: '202502', name: 'Benitez, Carlos', course: '1A', attendance: [], grades: { matematica: [4, 5, null], lengua: [6, 6, null] } },
+                    { id: '202503', name: 'Castro, Maria', course: '1A', attendance: [], grades: { matematica: [9, 10, null], lengua: [8, 9, null] } },
+                    { id: '202504', name: 'Diaz, Juan', course: '2B', attendance: [], grades: { matematica: [6, 6, null], lengua: [7, 7, null] } },
+                    { id: '202505', name: 'Fernandez, Lucia', course: '2B', attendance: [], grades: { matematica: [2, 3, null], lengua: [5, 4, null] } }
+                ],
+                users: [
+                    { id: 1, name: 'Marta Gómez', email: 'director@sea.edu', role: 'Directivo' },
+                    { id: 2, name: 'Ricardo Fernández', email: 'coord@sea.edu', role: 'Preceptor' }
+                ],
+                alerts: []
+            },
+            
+            currentUser: null,
+            charts: {},
+
+            init: function() {
+                document.getElementById('currentDate').innerText = new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('attDate').valueAsDate = new Date();
+                
+                const session = sessionStorage.getItem('sea_session');
+                if(session) {
+                    this.currentUser = JSON.parse(session);
+                    this.showApp();
+                }
+                
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.login();
+                });
+            },
+            // --- FUNCIÓN NUEVA PARA EL MENU DEL LOGIN ---
+            toggleLoginSection: function(view) {
+                const form = document.getElementById('login-form-container');
+                const info = document.getElementById('school-info-container');
+                
+                // Si view es 'home', mostramos form, ocultamos info
+                if (view === 'home') {
+                    form.style.display = 'block';
+                    info.style.display = 'none';
+                    // Animación simple
+                    form.classList.add('fade-in');
+                } 
+                // Si view es 'info', ocultamos form, mostramos info
+                else if (view === 'info') {
+                    form.style.display = 'none';
+                    info.style.display = 'block';
+                    info.classList.add('fade-in');
+                }
+            },
+            login: function() {
+                const email = document.getElementById('loginEmail').value;
+                const pass = document.getElementById('loginPass').value;
+                if (pass === '123456') {
+                    this.currentUser = { 
+                        name: email.includes('director') ? 'Marta Gómez' : 'Usuario Demo', 
+                        role: email.includes('director') ? 'Directora General' : 'Preceptor',
+                        email: email
+                    };
+                    sessionStorage.setItem('sea_session', JSON.stringify(this.currentUser));
+                    this.showApp();
+                } else {
+                    document.getElementById('loginError').classList.remove('d-none');
+                }
+            },
+
+            logout: function() {
+                sessionStorage.removeItem('sea_session');
+                location.reload();
+            },
+
+            showApp: function() {
+                    document.getElementById('login-view').style.display = 'none';
+                    document.getElementById('app-view').style.display = 'block';
+                    document.getElementById('userNameDisplay').innerText = this.currentUser.name;
+                    document.getElementById('userRoleDisplay').innerText = this.currentUser.role;
+                    
+                    // --- NUEVO: Actualiza el input del preceptor en la pestaña asistencia ---
+                    const preceptorInput = document.querySelector('#attendanceForm input[readonly]');
+                    if(preceptorInput) preceptorInput.value = this.currentUser.name;
+                    // ------------------------------------------------------------------------
+                    
+                    // Inicializaciones y renderizado
+                    this.initCharts();
+                    this.scanAlerts();
+                    this.renderUsers();
+                    this.renderStudents();
+                    this.renderSubjects();
+                    this.updateDropdowns();
+                },
+
+            toggleSidebar: function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.sidebar-overlay').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            },
+
+            navigate: function(sectionId, element) {
+                document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+                if(element) element.classList.add('active');
+                
+                const titles = {
+                    'dashboard': 'Panel de Control',
+                    'administracion': 'Administración Escolar',
+                    'asistencia': 'Registro de Asistencia',
+                    'calificaciones': 'Gestión Académica',
+                    'reportes': 'Exportación',
+                    'alertas': 'Alertas',
+                    'usuarios': 'Usuarios'
+                };
+                document.getElementById('page-title').innerText = titles[sectionId] || 'SEA';
+                
+                // --- MODIFICACIÓN AQUÍ ---
+                if(sectionId === 'dashboard') {
+                    this.scanAlerts(); // Escanea alertas nuevas basadas en cambios recientes
+                    this.loadDashboardStats(); // Actualiza los números (KPIs)
+                    this.updateCharts(); // Actualiza los gráficos
+                }
+                // -------------------------
+
+                if(sectionId === 'administracion') { this.renderStudents(); this.renderSubjects(); }
+            },
+
+            // --- LÓGICA DINÁMICA (CONECTA ADMIN CON EL RESTO) ---
+            updateDropdowns: function() {
+                // Obtener lista única de cursos de los estudiantes existentes
+                const courses = [...new Set(this.db.students.map(s => s.course))].sort();
+                
+                // Actualizar selects de Cursos (Asistencia, Notas, Reportes)
+                const courseSelects = document.querySelectorAll('.dynamic-course-select');
+                courseSelects.forEach(select => {
+                    const currentVal = select.value;
+                    select.innerHTML = '<option value="" selected disabled>Seleccionar...</option>';
+                    courses.forEach(c => {
+                        select.innerHTML += `<option value="${c}">${c}</option>`;
+                    });
+                    if(courses.includes(currentVal)) select.value = currentVal;
+                });
+
+                // Actualizar Select de Materias en Notas
+                const subjSelect = document.getElementById('gradeSubject');
+                if(subjSelect) {
+                    const currentVal = subjSelect.value;
+                    subjSelect.innerHTML = '';
+                    this.db.subjects.forEach(sub => {
+                        subjSelect.innerHTML += `<option value="${sub.id}">${sub.name}</option>`;
+                    });
+                    if(currentVal) subjSelect.value = currentVal;
+                }
+                
+                document.getElementById('totalStudentsCount').innerText = this.db.students.length;
+            },
+
+            // --- ADMINISTRACIÓN ---
+            // --- ADMINISTRACIÓN DE ALUMNOS (AGREGAR, EDITAR, ELIMINAR) ---
+            renderStudents: function() {
+                const tbody = document.getElementById('studentsTableBody');
+                tbody.innerHTML = '';
+                this.db.students.forEach((s, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td class="fw-bold">${s.name}</td>
+                            <td><span class="badge bg-info text-dark">${s.course}</span></td>
+                            <td>
+                                <!-- Botón Editar -->
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="app.editStudent(${index})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <!-- Botón Eliminar -->
+                                <button class="btn btn-sm btn-outline-danger" onclick="app.deleteStudent(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            },
+
+            // Abrir modal para CREAR
+            openNewStudentModal: function() {
+                document.getElementById('studentForm').reset();
+                document.getElementById('stIndex').value = "-1"; // -1 indica nuevo registro
+                document.getElementById('studentModalTitle').innerText = "Registrar Alumno";
+                new bootstrap.Modal(document.getElementById('studentModal')).show();
+            },
+
+            // Abrir modal para EDITAR
+            editStudent: function(index) {
+                const student = this.db.students[index];
+                document.getElementById('stIndex').value = index; // Guardamos el índice
+                document.getElementById('stLegajo').value = student.id;
+                document.getElementById('stName').value = student.name;
+                document.getElementById('stCourse').value = student.course;
+                
+                document.getElementById('studentModalTitle').innerText = "Editar Alumno";
+                new bootstrap.Modal(document.getElementById('studentModal')).show();
+            },
+
+            // Guardar (sirve para Crear y Editar)
+            saveStudent: function() {
+                const index = document.getElementById('stIndex').value;
+                const legajo = document.getElementById('stLegajo').value;
+                const name = document.getElementById('stName').value;
+                const course = document.getElementById('stCourse').value;
+
+                if(legajo && name) {
+                    if (index === "-1") {
+                        // Lógica de AGREGAR NUEVO
+                        this.db.students.push({ 
+                            id: legajo, 
+                            name: name, 
+                            course: course, 
+                            attendance: [], 
+                            grades: {} 
+                        });
+                        alert('Alumno agregado exitosamente');
+                    } else {
+                        // Lógica de EDITAR EXISTENTE
+                        const i = parseInt(index);
+                        this.db.students[i].id = legajo;
+                        this.db.students[i].name = name;
+                        this.db.students[i].course = course;
+                        alert('Datos actualizados correctamente');
+                    }
+
+                    // Cerrar modal y refrescar
+                    const modalEl = document.getElementById('studentModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    modalInstance.hide();
+                    
+                    this.renderStudents();
+                    this.updateDropdowns(); // Actualiza selectores globales
+                } else {
+                    alert("Por favor complete todos los campos");
+                }
+            },
+
+            deleteStudent: function(index) {
+                if(confirm('¿Está seguro de eliminar a este alumno? Se perderán sus notas y asistencia.')) {
+                    this.db.students.splice(index, 1);
+                    this.renderStudents();
+                    this.updateDropdowns();
+                }
+            },
+
+            // --- ADMINISTRACIÓN DE MATERIAS (AGREGAR, EDITAR, ELIMINAR) ---
+            renderSubjects: function() {
+                const tbody = document.getElementById('subjectsTableBody');
+                tbody.innerHTML = '';
+                this.db.subjects.forEach((s, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${s.id}</td>
+                            <td class="fw-bold">${s.name}</td>
+                            <td>${s.year}</td>
+                            <td>
+                                <!-- Botón Editar -->
+                                <button class="btn btn-sm btn-outline-success me-1" onclick="app.editSubject(${index})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <!-- Botón Eliminar -->
+                                <button class="btn btn-sm btn-outline-danger" onclick="app.deleteSubject(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            },
+
+            // Abrir modal para CREAR
+            openNewSubjectModal: function() {
+                document.getElementById('subjectForm').reset();
+                document.getElementById('subIndex').value = "-1";
+                document.getElementById('subjectModalTitle').innerText = "Registrar Materia";
+                new bootstrap.Modal(document.getElementById('subjectModal')).show();
+            },
+
+            // Abrir modal para EDITAR
+            editSubject: function(index) {
+                const sub = this.db.subjects[index];
+                document.getElementById('subIndex').value = index;
+                document.getElementById('subId').value = sub.id;
+                document.getElementById('subName').value = sub.name;
+                document.getElementById('subYear').value = sub.year;
+
+                document.getElementById('subjectModalTitle').innerText = "Editar Materia";
+                new bootstrap.Modal(document.getElementById('subjectModal')).show();
+            },
+
+            // Guardar Materia (Crear o Editar)
+            saveSubject: function() {
+                const index = document.getElementById('subIndex').value;
+                const id = document.getElementById('subId').value;
+                const name = document.getElementById('subName').value;
+                const year = document.getElementById('subYear').value;
+
+                if(id && name) {
+                    if(index === "-1") {
+                        // Crear
+                        this.db.subjects.push({ id, name, year });
+                        alert('Materia creada exitosamente');
+                    } else {
+                        // Editar
+                        const i = parseInt(index);
+                        this.db.subjects[i].id = id;
+                        this.db.subjects[i].name = name;
+                        this.db.subjects[i].year = year;
+                        alert('Materia actualizada correctamente');
+                    }
+
+                    // Cerrar modal y actualizar
+                    const modalEl = document.getElementById('subjectModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    modalInstance.hide();
+
+                    this.renderSubjects();
+                    this.updateDropdowns(); // Importante: actualiza los selectores de notas
+                } else {
+                    alert("Complete los campos requeridos");
+                }
+            },
+
+            deleteSubject: function(index) {
+                if(confirm('¿Eliminar materia? Esto podría afectar las notas cargadas.')) { 
+                    this.db.subjects.splice(index, 1); 
+                    this.renderSubjects(); 
+                    this.updateDropdowns(); 
+                }
+            },
+
+            // --- ASISTENCIA ---
+            loadAttendanceSheet: function(e) {
+                e.preventDefault();
+                const course = document.getElementById('attCourse').value;
+                const date = document.getElementById('attDate').value;
+                const students = this.db.students.filter(s => s.course === course);
+                const tbody = document.getElementById('attendanceTableBody');
+                tbody.innerHTML = '';
+                
+                if(students.length === 0) tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay alumnos en este curso.</td></tr>';
+
+                students.forEach(s => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${s.id}</td><td class="fw-bold">${s.name}</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="status_${s.id}" id="P_${s.id}" value="P" checked>
+                                    <label class="btn btn-outline-success" for="P_${s.id}">P</label>
+                                    <input type="radio" class="btn-check" name="status_${s.id}" id="A_${s.id}" value="A">
+                                    <label class="btn btn-outline-danger" for="A_${s.id}">A</label>
+                                    <input type="radio" class="btn-check" name="status_${s.id}" id="T_${s.id}" value="T">
+                                    <label class="btn btn-outline-warning" for="T_${s.id}">T</label>
+                                </div>
+                            </td>
+                            <td><input type="text" class="form-control form-control-sm"></td>
+                        </tr>`;
+                });
+                document.getElementById('attendanceSheet').style.display = 'block';
+                document.getElementById('sheetHeader').innerText = `Planilla: ${course} - ${date}`;
+            },
+            saveAttendance: function() {
+                alert("Asistencia guardada.");
+                document.getElementById('attendanceSheet').style.display = 'none';
+            },
+            markAll: function(status) { document.querySelectorAll(`input[value="${status}"]`).forEach(r => r.checked = true); },
+
+            // --- NOTAS ---
+            loadGrades: function() {
+                const course = document.getElementById('gradeCourse').value;
+                const subject = document.getElementById('gradeSubject').value;
+                const students = this.db.students.filter(s => s.course === course);
+                const tbody = document.getElementById('gradesTableBody');
+                tbody.innerHTML = '';
+
+                if(students.length === 0) tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay alumnos.</td></tr>';
+
+                students.forEach(s => {
+                    if(!s.grades[subject]) s.grades[subject] = [null, null, null];
+                    const grades = s.grades[subject];
+                    const avg = this.calculateAverage(grades);
+                    const statusClass = avg >= 6 ? 'passing-grade' : (avg > 0 ? 'failing-grade' : '');
+                    const badgeClass = avg >= 6 ? 'bg-success' : 'bg-danger';
+                    const badgeText = avg >= 6 ? 'Aprobado' : (avg > 0 ? 'Riesgo' : '-');
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="text-start ps-3 fw-bold">${s.name}</td>
+                            <td><input type="number" class="grade-input" min="1" max="10" value="${grades[0]||''}" onchange="app.updateGrade('${s.id}', 0, this.value)"></td>
+                            <td><input type="number" class="grade-input" min="1" max="10" value="${grades[1]||''}" onchange="app.updateGrade('${s.id}', 1, this.value)"></td>
+                            <td><input type="number" class="grade-input" min="1" max="10" value="${grades[2]||''}" onchange="app.updateGrade('${s.id}', 2, this.value)"></td>
+                            <td class="bg-light fw-bold ${statusClass}" id="avg_${s.id}">${avg||'-'}</td>
+                            <td><span class="badge ${badgeClass}" id="status_${s.id}">${badgeText}</span></td>
+                        </tr>`;
+                });
+                document.getElementById('gradesContainer').style.display = 'block';
+            },
+            resetGradesTable: function() { document.getElementById('gradesContainer').style.display = 'none'; },
+            updateGrade: function(id, trim, val) {
+                const sub = document.getElementById('gradeSubject').value;
+                const st = this.db.students.find(s => s.id === id);
+                if(st) {
+                    st.grades[sub][trim] = parseFloat(val);
+                    const newAvg = this.calculateAverage(st.grades[sub]);
+                    const avgEl = document.getElementById(`avg_${id}`);
+                    avgEl.innerText = newAvg;
+                    avgEl.className = `bg-light fw-bold ${newAvg>=6?'passing-grade':'failing-grade'}`;
+                    const statEl = document.getElementById(`status_${id}`);
+                    statEl.className = `badge ${newAvg>=6?'bg-success':'bg-danger'}`;
+                    statEl.innerText = newAvg>=6?'Aprobado':'Riesgo';
+                }
+            },
+            calculateAverage: function(arr) {
+                const valid = arr.filter(n => n!==null && !isNaN(n) && n!=="");
+                if(valid.length===0) return 0;
+                return (valid.reduce((a,b)=>Number(a)+Number(b),0)/valid.length).toFixed(2);
+            },
+            notifyChanges: function() { alert("Notas notificadas a dirección."); },
+
+            // --- REPORTES Y ALERTAS ---
+
+            generatePDF: function() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // 1. Obtener configuración del usuario
+                const type = document.getElementById('reportType').value;
+                const course = document.getElementById('reportCourse').value;
+
+                if (!course) return alert("Por favor, seleccione un curso para exportar.");
+
+                // 2. Filtrar alumnos del curso
+                const students = this.db.students.filter(s => s.course === course);
+                if (students.length === 0) return alert("No hay alumnos en el curso seleccionado.");
+
+                let title = "";
+                let head = [];
+                let body = [];
+
+                // 3. Lógica según tipo de reporte
+                if (type === 'boletin') {
+                    title = `Boletín de Calificaciones - Curso ${course}`;
+                    
+                    // Generar cabeceras dinámicas basadas en las materias existentes
+                    const subjectList = this.db.subjects; 
+                    const subjectHeaders = subjectList.map(s => s.name.substring(0, 10) + "."); // Nombres cortos
+                    head = [['Legajo', 'Estudiante', ...subjectHeaders, 'Prom. Gral']];
+
+                    // Generar filas con las notas reales
+                    body = students.map(s => {
+                        let row = [s.id, s.name];
+                        let sum = 0;
+                        let count = 0;
+
+                        subjectList.forEach(sub => {
+                            const grades = s.grades[sub.id] || []; // Obtener array de notas
+                            const avg = this.calculateAverage(grades); // Usar tu función existente
+                            row.push(avg > 0 ? avg : '-');
+                            
+                            if (avg > 0) { sum += parseFloat(avg); count++; }
+                        });
+
+                        // Promedio general del alumno
+                        const finalAvg = count > 0 ? (sum / count).toFixed(2) : '-';
+                        row.push(finalAvg);
+                        return row;
+                    });
+
+                } else {
+                    // Reporte de Asistencia
+                    title = `Informe de Asistencia - Curso ${course}`;
+                    head = [['Legajo', 'Estudiante', 'Faltas Injust.', 'Faltas Justif.', 'Condición']];
+                    
+                    // Simulamos datos de asistencia calculados (ya que la DB es simple)
+                    body = students.map(s => {
+                        // Aquí podrías sumar los "A" del historial real si tuvieras historial completo
+                        // Para el ejemplo, generamos datos basados en el ID para que sean consistentes
+                        const absences = parseInt(s.id.slice(-1)) * 2; 
+                        const condition = absences > 15 ? 'LIBRE' : 'REGULAR';
+                        return [s.id, s.name, absences, '0', condition];
+                    });
+                }
+
+                // 4. Generar Documento
+                doc.setFontSize(16);
+                doc.setTextColor(40);
+                doc.text("SEA - Sistema Escolar Automatizado", 14, 15);
+                
+                doc.setFontSize(12);
+                doc.text(title, 14, 25);
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, 14, 32);
+
+                doc.autoTable({
+                    startY: 35,
+                    head: head,
+                    body: body,
+                    theme: 'grid',
+                    headStyles: { fillColor: [13, 110, 253] }, // Color Primary Bootstrap
+                    styles: { fontSize: 8, cellPadding: 3 }
+                });
+
+                doc.save(`SEA_${type}_${course}.pdf`);
+            },
+
+            generateExcel: function() {
+                const type = document.getElementById('reportType').value;
+                const course = document.getElementById('reportCourse').value;
+
+                if (!course) return alert("Seleccione un curso.");
+
+                const students = this.db.students.filter(s => s.course === course);
+                if (students.length === 0) return alert("No hay datos para exportar.");
+
+                let data = [];
+
+                if (type === 'boletin') {
+                    // Mapeo de datos para Excel (Boletín)
+                    data = students.map(s => {
+                        let row = {
+                            "Legajo": s.id,
+                            "Nombre Completo": s.name,
+                            "Curso": s.course
+                        };
+                        
+                        // Agregar columnas de materias dinámicamente
+                        this.db.subjects.forEach(sub => {
+                            const avg = this.calculateAverage(s.grades[sub.id] || []);
+                            row[sub.name] = avg > 0 ? Number(avg) : "";
+                        });
+                        return row;
+                    });
+                } else {
+                    // Mapeo de datos para Excel (Asistencia)
+                    data = students.map(s => {
+                         const absences = parseInt(s.id.slice(-1)) * 2; // Simulación consistente
+                         return {
+                            "Legajo": s.id,
+                            "Estudiante": s.name,
+                            "Curso": s.course,
+                            "Faltas Injustificadas": absences,
+                            "Faltas Justificadas": 0,
+                            "Condición": absences > 15 ? "LIBRE" : "REGULAR"
+                         };
+                    });
+                }
+
+                // Generar libro de Excel
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, type === 'boletin' ? "Calificaciones" : "Asistencia");
+                
+                // Ajuste de ancho de columnas automático simple
+                const wscols = [{wch:10}, {wch:30}, {wch:10}, {wch:15}, {wch:15}];
+                ws['!cols'] = wscols;
+
+                XLSX.writeFile(wb, `SEA_Export_${course}.xlsx`);
+            },
+            // --- ALERTAS Y COMUNICACIÓN (LÓGICA MODIFICADA) ---
+
+            // 1. Escaner de Sistema (Ahora incluye Asistencia + Notas)
+            scanAlerts: function() {
+                const tbody = document.getElementById('alertsTableBody');
+                tbody.innerHTML = '';
+                this.db.alerts = [];
+                
+                // Simulamos datos de asistencia para que el scanner detecte algo (ya que la DB inicial está vacía)
+                // En un sistema real, esto leería el historial real.
+                const simulatedAbsences = { '202502': 5, '202505': 3 }; 
+
+                this.db.students.forEach(s => {
+                    // A) ESCANEO DE NOTAS (Pedagógico)
+                    const subjects = Object.keys(s.grades);
+                    subjects.forEach(sub => {
+                        const avg = this.calculateAverage(s.grades[sub]);
+                        if(avg > 0 && avg < 6) {
+                            this.db.alerts.push({ 
+                                id: Date.now() + Math.random(),
+                                date: new Date().toLocaleDateString(), 
+                                student: s.name, 
+                                type: 'Rendimiento', 
+                                detail: `Promedio bajo (${avg}) en ${sub.toUpperCase()}` 
+                            });
+                        }
+                    });
+
+                    // B) ESCANEO DE ASISTENCIA (Nuevo)
+                    // Usamos los datos simulados o el array real si tuviera datos
+                    const absences = simulatedAbsences[s.id] || 0; 
+                    if(absences >= 3) {
+                         this.db.alerts.push({ 
+                            id: Date.now() + Math.random(),
+                            date: new Date().toLocaleDateString(), 
+                            student: s.name, 
+                            type: 'Asistencia', 
+                            detail: `Acumula ${absences} faltas injustificadas` 
+                        });
+                    }
+                });
+                
+                // RENDERIZADO DE LA TABLA
+                if(this.db.alerts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">✅ Sistema escaneado: Sin alertas activas.</td></tr>';
+                    document.getElementById('dashAlerts').innerText = "0";
+                    document.getElementById('alertCount').innerText = "0";
+                } else {
+                    document.getElementById('dashAlerts').innerText = this.db.alerts.length;
+                    document.getElementById('alertCount').innerText = this.db.alerts.length;
+                    
+                    this.db.alerts.forEach((a, index) => {
+                        // Define color según el tipo
+                        const badgeColor = a.type === 'Asistencia' ? 'bg-warning text-dark' : 'bg-danger';
+                        const icon = a.type === 'Asistencia' ? '<i class="fas fa-user-clock"></i>' : '<i class="fas fa-book-dead"></i>';
+
+                        tbody.innerHTML += `
+                        <tr>
+                            <td>${a.date}</td>
+                            <td class="fw-bold">${a.student}</td>
+                            <td><span class="badge ${badgeColor}">${icon} ${a.type}</span></td>
+                            <td>${a.detail}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <!-- Botón VER -->
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="app.viewAlert(${index})" title="Ver Detalle">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <!-- Botón ENVIAR (Abre modal SMS/Correo) -->
+                                    <button class="btn btn-sm btn-outline-primary" onclick="app.openCommModal(${index})" title="Notificar Tutor">
+                                        <i class="fas fa-paper-plane"></i> Enviar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                }
+            },
+
+            // 2. Botón VER (Funcionalidad simple)
+            viewAlert: function(index) {
+                const alertData = this.db.alerts[index];
+                alert(`DETALLE DE ALERTA PEDAGÓGICA:\n\nEstudiante: ${alertData.student}\nFecha: ${alertData.date}\nTipo: ${alertData.type}\n\nObservación del Sistema: ${alertData.detail}\n\nEstado: Pendiente de resolución.`);
+            },
+
+            // 3. Abrir Modal de Comunicación (SMS vs Correo)
+            openCommModal: function(index) {
+                const alertData = this.db.alerts[index];
+                document.getElementById('commAlertIndex').value = index;
+                document.getElementById('commStudentName').innerText = alertData.student;
+                document.getElementById('commReason').innerText = `${alertData.type} - ${alertData.detail}`;
+                
+                // Mensaje predeterminado
+                const msg = `Estimada familia de ${alertData.student}: Le informamos que se ha detectado una alerta de ${alertData.type} (${alertData.detail}). Por favor, contactar a la escuela.`;
+                document.getElementById('commMessage').value = msg;
+
+                new bootstrap.Modal(document.getElementById('commModal')).show();
+            },
+
+            // 4. Ejecutar envío (Simulación)
+            sendAlert: function() {
+                const index = document.getElementById('commAlertIndex').value;
+                const type = document.querySelector('input[name="commType"]:checked').value; // 'sms' o 'email'
+                const msg = document.getElementById('commMessage').value;
+                const student = document.getElementById('commStudentName').innerText;
+
+                // Simulación de envío
+                const methodText = type === 'sms' ? 'SMS 📱' : 'Correo Electrónico 📧';
+                
+                // Cerrar modal
+                const modalEl = document.getElementById('commModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                modalInstance.hide();
+
+                // Feedback al usuario
+                alert(`✅ ENVIADO CON ÉXITO\n\nDestinatario: Tutor de ${student}\nVía: ${methodText}\nContenido: "${msg}"`);
+
+                // Opcional: Eliminar la alerta de la lista si ya fue gestionada
+                // this.db.alerts.splice(index, 1);
+                // this.scanAlerts(); // Refrescar tabla
+            },
+            // --- USUARIOS ---
+
+            // 1. Renderizar tabla (Ahora incluye botones Editar y Eliminar funcionales)
+            renderUsers: function() {
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+                this.db.users.forEach((u, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${u.name}</td>
+                            <td>${u.email}</td>
+                            <td><span class="badge bg-secondary">${u.role}</span></td>
+                            <td>
+                                <!-- Botón Editar: Llama a editUser con el índice -->
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="app.editUser(${index})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <!-- Botón Eliminar: Llama a deleteUser con el índice -->
+                                <button class="btn btn-sm btn-outline-danger" onclick="app.deleteUser(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            },
+
+            // 2. Abrir modal para NUEVO usuario
+            openNewUserModal: function() {
+                document.getElementById('userForm').reset();
+                document.getElementById('userIndex').value = "-1"; // -1 indica nuevo
+                document.getElementById('userModalTitle').innerText = "Crear Usuario";
+            },
+
+            // 3. Abrir modal para EDITAR usuario
+            editUser: function(index) {
+                const user = this.db.users[index];
+                document.getElementById('userIndex').value = index; // Guarda el índice real
+                document.getElementById('newUserName').value = user.name;
+                document.getElementById('newUserEmail').value = user.email;
+                document.getElementById('newUserRole').value = user.role;
+                
+                document.getElementById('userModalTitle').innerText = "Editar Usuario";
+                new bootstrap.Modal(document.getElementById('userModal')).show();
+            },
+
+            // 4. Guardar (Lógica principal de la corrección)
+            saveUser: function() {
+                const index = document.getElementById('userIndex').value; // Lee el input oculto
+                const name = document.getElementById('newUserName').value;
+                const email = document.getElementById('newUserEmail').value;
+                const role = document.getElementById('newUserRole').value;
+
+                if(name && email) {
+                    if(index === "-1") {
+                        // Nuevo: Agrega al array
+                        this.db.users.push({ id: Date.now(), name, email, role });
+                    } else {
+                        // Editar: Modifica la posición específica del array
+                        const i = parseInt(index);
+                        this.db.users[i].name = name;
+                        this.db.users[i].email = email;
+                        this.db.users[i].role = role;
+                    }
+                    
+                    // Cerrar modal y actualizar
+                    const modalEl = document.getElementById('userModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    modalInstance.hide();
+                    
+                    this.renderUsers();
+                } else {
+                    alert("Complete todos los campos");
+                }
+            },
+
+            // 5. Eliminar Usuario
+            deleteUser: function(index) {
+                if(confirm('¿Eliminar este usuario permanentemente?')) {
+                    this.db.users.splice(index, 1);
+                    this.renderUsers();
+                }
+            },
+
+            // --- CHARTS ---
+            // --- CHARTS Y ESTADÍSTICAS (ACTUALIZADO) ---
+            
+            // 1. Función para actualizar los números grandes (KPIs)
+            // Remplaza la función loadDashboardStats: function() { ... } por esta:
+
+           loadDashboardStats: function() {
+                    // 1. Matrícula
+                    const totalStudentsEl = document.getElementById('totalStudentsCount');
+                    if(totalStudentsEl) totalStudentsEl.innerText = this.db.students.length;
+                    
+                    // 2. Alertas
+                    const alertsEl = document.getElementById('dashAlerts');
+                    if(alertsEl) alertsEl.innerText = this.db.alerts.length;
+
+                    // 3. Porcentaje de Notas (MEJORADO: Solo cuenta materias activas)
+                    let totalPossibleGrades = this.db.students.length * this.db.subjects.length * 3; 
+                    let filledGrades = 0;
+                    
+                    this.db.students.forEach(s => {
+                        // Solo miramos notas de materias que TODAVÍA EXISTEN en la base de datos
+                        this.db.subjects.forEach(sub => {
+                            const notasMateria = s.grades[sub.id]; // Buscamos por ID de materia activa
+                            if(Array.isArray(notasMateria)) {
+                                notasMateria.forEach(nota => { 
+                                    if(nota !== null && nota !== "" && !isNaN(nota)) filledGrades++; 
+                                });
+                            }
+                        });
+                    });
+
+                    const percent = totalPossibleGrades > 0 ? Math.round((filledGrades / totalPossibleGrades) * 100) : 0;
+                    
+                    const statsEl = document.getElementById('statsGradesPercent');
+                    if(statsEl) statsEl.innerText = percent + "%";
+                },
+            initCharts: function() {
+                if(this.charts.att) this.charts.att.destroy();
+                if(this.charts.aca) this.charts.aca.destroy();
+
+                const ctxAtt = document.getElementById('attendanceChart').getContext('2d');
+                this.charts.att = new Chart(ctxAtt, { type: 'doughnut', data: { labels: ['Presentes', 'Ausentes'], datasets: [{ data: [0, 0], backgroundColor: ['#198754', '#dc3545'] }] } });
+
+                const ctxAca = document.getElementById('academicChart').getContext('2d');
+                this.charts.aca = new Chart(ctxAca, { type: 'bar', data: { labels: [], datasets: [{ label: 'Promedio General', data: [], backgroundColor: '#0d6efd' }] } });
+                
+                // Llamamos a update para llenar los datos iniciales
+                this.updateCharts();
+            },
+
+            updateCharts: function() { 
+                if(!this.charts.att || !this.charts.aca) return;
+
+                // A) ACTUALIZAR GRÁFICO DE RENDIMIENTO (ACADÉMICO)
+                // 1. Obtener cursos únicos
+                const courses = [...new Set(this.db.students.map(s => s.course))].sort();
+                
+                // 2. Calcular promedio por curso
+                const courseAverages = courses.map(curso => {
+                    const studentsInCourse = this.db.students.filter(s => s.course === curso);
+                    if (studentsInCourse.length === 0) return 0;
+
+                    let totalSum = 0;
+                    let gradeCount = 0;
+
+                    studentsInCourse.forEach(s => {
+                        Object.values(s.grades).forEach(notasMateria => {
+                            const validNotes = notasMateria.filter(n => n !== null && n !== "" && !isNaN(n));
+                            if (validNotes.length > 0) {
+                                const sum = validNotes.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+                                totalSum += (sum / validNotes.length); // Promedio de la materia
+                                gradeCount++;
+                            }
+                        });
+                    });
+                    
+                    return gradeCount === 0 ? 0 : (totalSum / gradeCount).toFixed(2);
+                });
+
+                // 3. Inyectar datos al gráfico
+                this.charts.aca.data.labels = courses;
+                this.charts.aca.data.datasets[0].data = courseAverages;
+                this.charts.aca.update();
+
+                // B) ACTUALIZAR GRÁFICO DE ASISTENCIA (SIMULADO DINÁMICO)
+                // Como no tenemos base de datos histórica real en este ejemplo, simulamos basado en la cantidad de alumnos
+                // En un caso real, sumarías los "P" y "A" de un array de asistencia.
+                const totalStudents = this.db.students.length;
+                const simulatedPresent = Math.round(totalStudents * 0.90); // 90% presente
+                const simulatedAbsent = totalStudents - simulatedPresent;
+                
+                this.charts.att.data.datasets[0].data = [simulatedPresent, simulatedAbsent];
+                this.charts.att.update();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { app.init(); });
+    </script>
 </body>
 </html>
